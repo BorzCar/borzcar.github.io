@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BorzWear - Каталог одежды с выбором города</title>
+<title>BorzWear - Каталог одежды с фото</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -42,6 +42,9 @@
   input[type="text"]:focus, input[type="number"]:focus, select:focus {
     border-color: #007bff;
     outline: none;
+  }
+  input[type="file"] {
+    margin-top: 8px;
   }
   button {
     margin-top: 30px;
@@ -86,6 +89,7 @@
     padding: 18px 22px;
     font-size: 1.3rem;
     border-bottom: 1px solid #e6e6e6;
+    vertical-align: middle;
     text-align: left;
   }
   th {
@@ -94,6 +98,17 @@
   }
   tr:last-child td {
     border-bottom: none;
+  }
+  td img {
+    max-width: 80px;
+    max-height: 80px;
+    margin-right: 8px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .photos-cell {
+    display: flex;
+    gap: 6px;
   }
 </style>
 </head>
@@ -113,39 +128,33 @@
   <label for="citySelect">Выберите город</label>
   <select id="citySelect">
     <option value="">-- Выберите город --</option>
-    <option>Париж</option>
-    <option>Марсель</option>
-    <option>Лион</option>
-    <option>Тулуза</option>
-    <option>Ницца</option>
-    <option>Нант</option>
-    <option>Страсбург</option>
-    <option>Монпелье</option>
+    <option>Анже</option>
     <option>Бордо</option>
-    <option>Лилль</option>
-    <option>Ренн</option>
+    <option>Валансьен</option>
     <option>Гренобль</option>
     <option>Дижон</option>
-    <option>Анже</option>
     <option>Клермон-Ферран</option>
-    <option>Нанси</option>
-    <option>Авиньон</option>
-    <option>Перпиньян</option>
-    <option>Канны</option>
-    <option>Брест</option>
-    <option>Сен-Этьен</option>
-    <option>Ле-Ман</option>
-    <option>Ванн</option>
-    <option>Анси</option>
-    <option>Тур</option>
-    <option>Шамбери</option>
-    <option>Безансон</option>
-    <option>Валанс</option>
+    <option>Лилль</option>
+    <option>Лион</option>
+    <option>Монпелье</option>
+    <option>Нант</option>
+    <option>Ним</option>
+    <option>Ницца</option>
+    <option>Париж</option>
+    <option>Марсель</option>
     <option>Реймс</option>
+    <option>Ренн</option>
+    <option>Сент-Этьен</option>
+    <option>Страсбург</option>
+    <option>Тулуза</option>
+    <option>Тулон</option>
   </select>
 
   <label for="cityInput">Или введите город вручную</label>
   <input type="text" id="cityInput" placeholder="Например, Лилль" />
+
+  <label for="photos">Загрузите до 3 фото товара</label>
+  <input type="file" id="photos" accept="image/*" multiple />
 
   <button type="submit">Добавить в каталог</button>
 </form>
@@ -159,6 +168,7 @@
 <table id="catalogTable">
   <thead>
     <tr>
+      <th>Фото</th>
       <th>Название</th>
       <th>Цена (€)</th>
       <th>Размер</th>
@@ -176,22 +186,34 @@
   const filterCitySelect = document.getElementById('filterCity');
   const citySelect = document.getElementById('citySelect');
   const cityInput = document.getElementById('cityInput');
+  const photosInput = document.getElementById('photos');
 
   let products = [];
 
-  // При выборе города из списка - подставляем в поле ввода
   citySelect.addEventListener('change', () => {
     cityInput.value = citySelect.value;
   });
 
-  productForm.addEventListener('submit', e => {
+  productForm.addEventListener('submit', async e => {
     e.preventDefault();
 
-    // Берём город из поля ввода, если оно пустое, берём из селекта
     let city = cityInput.value.trim() || citySelect.value.trim();
     if (!city) {
       alert('Пожалуйста, укажите город (выберите или введите вручную)');
       return;
+    }
+
+    // Получаем файлы изображений (максимум 3)
+    const files = photosInput.files;
+    if (files.length > 3) {
+      alert('Можно загрузить максимум 3 фото');
+      return;
+    }
+
+    // Читаем файлы в base64
+    const photosData = [];
+    for (let i = 0; i < files.length; i++) {
+      photosData.push(await readFileAsDataURL(files[i]));
     }
 
     const newProduct = {
@@ -199,6 +221,7 @@
       price: parseFloat(productForm.price.value).toFixed(2),
       size: productForm.size.value.trim(),
       city: city,
+      photos: photosData,
     };
 
     products.push(newProduct);
@@ -206,6 +229,7 @@
     productForm.reset();
     cityInput.value = '';
     citySelect.value = '';
+    photosInput.value = null;
   });
 
   filterCitySelect.addEventListener('change', () => {
@@ -224,7 +248,13 @@
 
     filteredProducts.forEach(product => {
       const tr = document.createElement('tr');
+
+      const photosHtml = product.photos.length
+        ? product.photos.map(src => `<img src="${src}" alt="Фото товара">`).join('')
+        : 'Нет фото';
+
       tr.innerHTML = `
+        <td class="photos-cell">${photosHtml}</td>
         <td>${product.name}</td>
         <td>€${product.price}</td>
         <td>${product.size}</td>
@@ -248,10 +278,4 @@
     });
 
     if (cities.includes(current)) {
-      filterCitySelect.value = current;
-    }
-  }
-</script>
-
-</body>
-</html>
+     
