@@ -148,11 +148,6 @@
     color: white;
   }
 </style>
-
-<!-- Firebase SDK подключение -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 </head>
 <body>
 
@@ -238,22 +233,29 @@
   </tbody>
 </table>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
 <script>
-  // Firebase config — оставь свои данные
+  // ТВОИ НАСТРОЙКИ Firebase: ЗАМЕНИ НА СВОИ !!!
   const firebaseConfig = {
-    apiKey: "AIzaSyCxCpZRthCJZkNLHKHyiEq_KmsqpDVUwY8",
-    authDomain: "project-3077901319345681281.firebaseapp.com",
-    databaseURL: "https://project-3077901319345681281-default-rtdb.firebaseio.com",
-    projectId: "project-3077901319345681281",
-    storageBucket: "project-3077901319345681281.appspot.com",
-    messagingSenderId: "732631336648",
-    appId: "1:732631336648:web:2d23b478e7d1bfdb2987fd"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    databaseURL: "YOUR_DATABASE_URL",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
 
   // Инициализация Firebase
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
+  const storage = firebase.storage();
 
+  // Элементы формы и каталога
   const productForm = document.getElementById('productForm');
   const catalogTableBody = document.querySelector('#catalogTable tbody');
   const filterCitySelect = document.getElementById('filterCity');
@@ -265,171 +267,195 @@
   const filterMaxPriceInput = document.getElementById('filterMaxPrice');
   const filterSizeInput = document.getElementById('filterSize');
 
+  // Кеш для товаров из БД
   let products = [];
 
-  // Вспомогательная функция для чтения файлов (фото) как base64, для простого хранения
-  function readFileAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = e => reject(e);
-      reader.readAsDataURL(file);
-    });
-  }
+  // При выборе города из селекта подставляем в инпут
+  citySelect.addEventListener('change', () => {
+    cityInput.value = citySelect.value || '';
+  });
 
-  // Добавление товара в Firebase
-  async function addProductToFirebase(product) {
-    const newProductRef = database.ref('products').push();
-    await newProductRef.set(product);
-  }
-
-  // Загрузка товаров из Firebase
-  function loadProductsFromFirebase() {
-    database.ref('products').on('value', snapshot => {
-      products = [];
-      snapshot.forEach(childSnapshot => {
-        const product = childSnapshot.val();
-        product.id = childSnapshot.key;
-        products.push(product);
-      });
-      updateFilterCities();
-      renderCatalog();
-    });
-  }
-
-  // Обновление списка городов в фильтре (уникальные города из товаров)
-  function updateFilterCities() {
-    const citySet = new Set(products.map(p => p.city.trim()).filter(c => c));
-    // Очистим filterCity кроме "Все города"
-    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
-    Array.from(citySet).sort().forEach(city => {
-      const option = document.createElement('option');
-      option.value = city;
-      option.textContent = city;
-      filterCitySelect.appendChild(option);
-    });
-  }
-
-  // Отрисовка таблицы каталога с учётом фильтров
-  function renderCatalog() {
-    const filterName = filterNameInput.value.trim().toLowerCase();
-    const filterMaxPrice = parseFloat(filterMaxPriceInput.value);
-    const filterSize = filterSizeInput.value.trim().toLowerCase();
-    const filterCity = filterCitySelect.value.trim().toLowerCase();
-
-    catalogTableBody.innerHTML = '';
-
-    products.forEach(product => {
-      // Фильтры
-      if (filterName && !product.name.toLowerCase().includes(filterName)) return;
-      if (!isNaN(filterMaxPrice) && filterMaxPrice >= 0 && product.price > filterMaxPrice) return;
-      if (filterSize && product.size.toLowerCase() !== filterSize) return;
-      if (filterCity && product.city.toLowerCase() !== filterCity) return;
-
-      // Создаём строку
-      const tr = document.createElement('tr');
-
-      // Фото — отображаем как миниатюры (до 3)
-      const photosTd = document.createElement('td');
-      photosTd.className = 'photos-cell';
-      if (product.photos && product.photos.length) {
-        product.photos.slice(0,3).forEach(photoBase64 => {
-          const img = document.createElement('img');
-          img.src = photoBase64;
-          photosTd.appendChild(img);
-        });
-      } else {
-        photosTd.textContent = '-';
-      }
-      tr.appendChild(photosTd);
-
-      // Название
-      const nameTd = document.createElement('td');
-      nameTd.textContent = product.name;
-      tr.appendChild(nameTd);
-
-      // Цена
-      const priceTd = document.createElement('td');
-      priceTd.textContent = product.price.toFixed(2);
-      tr.appendChild(priceTd);
-
-      // Размер
-      const sizeTd = document.createElement('td');
-      sizeTd.textContent = product.size;
-      tr.appendChild(sizeTd);
-
-      // Город
-      const cityTd = document.createElement('td');
-      cityTd.textContent = product.city;
-      tr.appendChild(cityTd);
-
-      // Контакты (телефон)
-      const contactTd = document.createElement('td');
-      contactTd.className = 'contact-cell';
-
-      // Ссылка на звонок
-      const phoneLink = document.createElement('a');
-      phoneLink.href = 'tel:' + product.phone;
-      phoneLink.textContent = product.phone;
-      phoneLink.setAttribute('rel', 'nofollow');
-      contactTd.appendChild(phoneLink);
-
-      tr.appendChild(contactTd);
-
-      catalogTableBody.appendChild(tr);
-    });
-  }
-
-  // Обработчик отправки формы
+  // При добавлении нового товара
   productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    // Данные из формы
     const name = productForm.name.value.trim();
     const price = parseFloat(productForm.price.value);
     const size = productForm.size.value.trim();
     const phone = productForm.phone.value.trim();
+    let city = cityInput.value.trim() || citySelect.value.trim();
 
-    // Если выбран город из списка, он имеет приоритет
-    let city = citySelect.value.trim();
     if (!city) {
-      city = cityInput.value.trim();
+      alert('Пожалуйста, укажите город (выберите или введите вручную)');
+      return;
     }
-
-    // Загружаем фото (максимум 3)
-    let photos = [];
-    if (photosInput.files.length > 0) {
-      const files = Array.from(photosInput.files).slice(0, 3);
-      photos = await Promise.all(files.map(file => readFileAsDataURL(file)));
-    }
-
-    if (!name || !size || !phone || !city || isNaN(price)) {
-      alert('Пожалуйста, заполните все обязательные поля корректно.');
+    if (!name || isNaN(price) || !size || !phone) {
+      alert('Пожалуйста, заполните все обязательные поля');
       return;
     }
 
-    const newProduct = { name, price, size, phone, city, photos };
+    const files = photosInput.files;
+    if (files.length > 3) {
+      alert('Максимум 3 фото');
+      return;
+    }
 
-    // Сохраняем в Firebase
+    // Загружаем фото в Firebase Storage и получаем ссылки
+    let photoUrls = [];
     try {
-      await addProductToFirebase(newProduct);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const storageRef = storage.ref('products/' + Date.now() + '_' + file.name);
+        const snapshot = await storageRef.put(file);
+        const url = await snapshot.ref.getDownloadURL();
+        photoUrls.push(url);
+      }
+    } catch (err) {
+      alert('Ошибка загрузки фото: ' + err.message);
+      return;
+    }
+
+    // Создаём объект товара
+    const newProduct = {
+      name,
+      price,
+      size,
+      phone,
+      city,
+      photos: photoUrls
+    };
+
+    // Записываем в БД
+    try {
+      const newKey = database.ref().child('products').push().key;
+      await database.ref('products/' + newKey).set(newProduct);
+      // Очистим форму
       productForm.reset();
-      citySelect.value = "";
-      cityInput.value = "";
-      photos = [];
+      cityInput.value = '';
+      citySelect.value = '';
+      photosInput.value = '';
       alert('Товар успешно добавлен!');
-    } catch (error) {
-      alert('Ошибка при добавлении товара: ' + error.message);
+    } catch (err) {
+      alert('Ошибка при добавлении товара: ' + err.message);
     }
   });
 
-  // Обработчики фильтров — обновление списка товаров при вводе
-  filterNameInput.addEventListener('input', renderCatalog);
-  filterMaxPriceInput.addEventListener('input', renderCatalog);
-  filterSizeInput.addEventListener('input', renderCatalog);
-  filterCitySelect.addEventListener('change', renderCatalog);
+  // Функция отрисовки таблицы по фильтрам
+  function renderTable() {
+    const filterName = filterNameInput.value.trim().toLowerCase();
+    const filterMaxPrice = parseFloat(filterMaxPriceInput.value);
+    const filterSize = filterSizeInput.value.trim().toLowerCase();
+    const filterCity = filterCitySelect.value;
 
-  // Загрузить товары сразу при загрузке страницы
-  loadProductsFromFirebase();
+    catalogTableBody.innerHTML = '';
+
+    let filteredProducts = products.filter(p => {
+      if (filterName && !p.name.toLowerCase().includes(filterName)) return false;
+      if (!isNaN(filterMaxPrice) && filterMaxPrice > 0 && p.price > filterMaxPrice) return false;
+      if (filterSize && p.size.toLowerCase() !== filterSize) return false;
+      if (filterCity && filterCity !== '' && p.city !== filterCity) return false;
+      return true;
+    });
+
+    for (const p of filteredProducts) {
+      const tr = document.createElement('tr');
+
+      // Фото
+      const tdPhotos = document.createElement('td');
+      tdPhotos.classList.add('photos-cell');
+      if (p.photos && p.photos.length) {
+        p.photos.forEach(url => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = p.name;
+          tdPhotos.appendChild(img);
+        });
+      } else {
+        tdPhotos.textContent = 'Нет фото';
+      }
+      tr.appendChild(tdPhotos);
+
+      // Название
+      const tdName = document.createElement('td');
+      tdName.textContent = p.name;
+      tr.appendChild(tdName);
+
+      // Цена
+      const tdPrice = document.createElement('td');
+      tdPrice.textContent = p.price.toFixed(2);
+      tr.appendChild(tdPrice);
+
+      // Размер
+      const tdSize = document.createElement('td');
+      tdSize.textContent = p.size;
+      tr.appendChild(tdSize);
+
+      // Город
+      const tdCity = document.createElement('td');
+      tdCity.textContent = p.city;
+      tr.appendChild(tdCity);
+
+      // Контакты
+      const tdContact = document.createElement('td');
+      tdContact.classList.add('contact-cell');
+      // Телефон (ссылка на звонок)
+      const phoneLink = document.createElement('a');
+      phoneLink.href = `tel:${p.phone.replace(/\s+/g, '')}`;
+      phoneLink.textContent = p.phone;
+      tdContact.appendChild(phoneLink);
+      tr.appendChild(tdContact);
+
+      catalogTableBody.appendChild(tr);
+    }
+  }
+
+  // Подгрузка товаров из Firebase и слушатель на изменения
+  function loadProducts() {
+    database.ref('products').on('value', (snapshot) => {
+      const data = snapshot.val();
+      products = [];
+      const citiesSet = new Set();
+
+      if (data) {
+        for (const key in data) {
+          if (data.hasOwnProperty(key)) {
+            products.push(data[key]);
+            if(data[key].city) citiesSet.add(data[key].city);
+          }
+        }
+      }
+
+      // Заполняем фильтр городов динамически
+      // Сохраняем выбранное значение чтобы не сбросить при обновлении списка
+      const selectedCity = filterCitySelect.value;
+
+      // Очистим селект кроме "Все города"
+      filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+      Array.from(citiesSet).sort().forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        filterCitySelect.appendChild(option);
+      });
+
+      // Восстановим выбранный город если он есть
+      if (selectedCity && [...citiesSet].includes(selectedCity)) {
+        filterCitySelect.value = selectedCity;
+      }
+
+      renderTable();
+    });
+  }
+
+  // Обработчики фильтров для таблицы
+  filterNameInput.addEventListener('input', renderTable);
+  filterMaxPriceInput.addEventListener('input', renderTable);
+  filterSizeInput.addEventListener('input', renderTable);
+  filterCitySelect.addEventListener('change', renderTable);
+
+  // Загрузка товаров при старте
+  loadProducts();
 </script>
 
 </body>
