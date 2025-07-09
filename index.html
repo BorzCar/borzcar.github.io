@@ -76,7 +76,6 @@
     border-color: #007bff;
     outline: none;
   }
-  /* Новый фильтр */
   #filterBlock {
     max-width: 700px;
     margin: 0 auto 20px auto;
@@ -155,19 +154,19 @@
 <h1>Добавить товар</h1>
 <form id="productForm">
   <label for="name">Название одежды</label>
-  <input type="text" id="name" required placeholder="Например, Футболка BorzWear" />
+  <input type="text" id="name" name="name" required placeholder="Например, Футболка BorzWear" />
 
   <label for="price">Цена (€)</label>
-  <input type="number" id="price" min="0" step="0.01" required placeholder="Введите цену" />
+  <input type="number" id="price" name="price" min="0" step="0.01" required placeholder="Введите цену" />
 
   <label for="size">Размер</label>
-  <input type="text" id="size" required placeholder="Например, M, L, XL" />
+  <input type="text" id="size" name="size" required placeholder="Например, M, L, XL" />
 
   <label for="phone">Телефон продавца</label>
-  <input type="tel" id="phone" required placeholder="+33 6 12 34 56 78" pattern="^\+?[0-9\s\-]{7,15}$" />
+  <input type="tel" id="phone" name="phone" required placeholder="+33 6 12 34 56 78" pattern="^\+?[0-9\s\-]{7,15}$" />
 
   <label for="citySelect">Выберите город</label>
-  <select id="citySelect">
+  <select id="citySelect" name="citySelect">
     <option value="">-- Выберите город --</option>
     <option>Анже</option>
     <option>Бордо</option>
@@ -192,17 +191,16 @@
   </select>
 
   <label for="cityInput">Или введите город вручную</label>
-  <input type="text" id="cityInput" placeholder="Например, Лилль" />
+  <input type="text" id="cityInput" name="cityInput" placeholder="Например, Лилль" />
 
   <label for="photos">Загрузите до 3 фото товара</label>
-  <input type="file" id="photos" accept="image/*" multiple />
+  <input type="file" id="photos" name="photos" accept="image/*" multiple />
 
   <button type="submit">Добавить в каталог</button>
 </form>
 
 <h1>Каталог одежды</h1>
 
-<!-- Новый блок фильтров -->
 <div id="filterBlock">
   <label for="filterName">Поиск по названию:</label>
   <input type="text" id="filterName" placeholder="Введите название..." />
@@ -242,15 +240,14 @@
   const citySelect = document.getElementById('citySelect');
   const cityInput = document.getElementById('cityInput');
   const photosInput = document.getElementById('photos');
-  const phoneInput = document.getElementById('phone');
 
-  // Новые фильтры
   const filterNameInput = document.getElementById('filterName');
   const filterMaxPriceInput = document.getElementById('filterMaxPrice');
   const filterSizeInput = document.getElementById('filterSize');
 
   let products = [];
 
+  // При выборе города из селекта подставляем в инпут, чтобы удобнее было
   citySelect.addEventListener('change', () => {
     cityInput.value = citySelect.value;
   });
@@ -264,7 +261,7 @@
       return;
     }
 
-    if (!phoneInput.value.trim()) {
+    if (!productForm.phone.value.trim()) {
       alert('Пожалуйста, укажите телефон продавца');
       return;
     }
@@ -285,7 +282,7 @@
       price: parseFloat(productForm.price.value).toFixed(2),
       size: productForm.size.value.trim(),
       city: city,
-      phone: phoneInput.value.trim(),
+      phone: productForm.phone.value.trim(),
       photos: photosData,
     };
 
@@ -297,7 +294,17 @@
     photosInput.value = null;
   });
 
-  // Отрисовка каталога с фильтрами
+  // Помогает читать файл в dataURL для отображения фото
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = e => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Функция отрисовки каталога с применением фильтров
   function renderCatalog() {
     const nameFilter = filterNameInput.value.trim().toLowerCase();
     const maxPriceFilter = parseFloat(filterMaxPriceInput.value);
@@ -306,5 +313,89 @@
 
     catalogTableBody.innerHTML = '';
 
-    // Фильтруем товары по всем критериям
-    let filteredProducts = products.filter(product
+    // Фильтруем товары по всем фильтрам
+    const filteredProducts = products.filter(product => {
+      if (nameFilter && !product.name.toLowerCase().includes(nameFilter)) return false;
+      if (!isNaN(maxPriceFilter) && product.price > maxPriceFilter) return false;
+      if (sizeFilter && product.size.toLowerCase() !== sizeFilter) return false;
+      if (cityFilter && product.city.toLowerCase() !== cityFilter) return false;
+      return true;
+    });
+
+    // Отрисовка строк таблицы
+    filteredProducts.forEach(product => {
+      const tr = document.createElement('tr');
+
+      // Фото
+      const tdPhotos = document.createElement('td');
+      tdPhotos.classList.add('photos-cell');
+      product.photos.forEach(photo => {
+        const img = document.createElement('img');
+        img.src = photo;
+        img.alt = product.name;
+        tdPhotos.appendChild(img);
+      });
+      tr.appendChild(tdPhotos);
+
+      // Название
+      const tdName = document.createElement('td');
+      tdName.textContent = product.name;
+      tr.appendChild(tdName);
+
+      // Цена
+      const tdPrice = document.createElement('td');
+      tdPrice.textContent = product.price;
+      tr.appendChild(tdPrice);
+
+      // Размер
+      const tdSize = document.createElement('td');
+      tdSize.textContent = product.size;
+      tr.appendChild(tdSize);
+
+      // Город
+      const tdCity = document.createElement('td');
+      tdCity.textContent = product.city;
+      tr.appendChild(tdCity);
+
+      // Контакты
+      const tdContact = document.createElement('td');
+      tdContact.classList.add('contact-cell');
+
+      // Телефон - кликабельный
+      const aPhone = document.createElement('a');
+      aPhone.href = `tel:${product.phone}`;
+      aPhone.textContent = 'Позвонить';
+      tdContact.appendChild(aPhone);
+
+      tr.appendChild(tdContact);
+
+      catalogTableBody.appendChild(tr);
+    });
+
+    updateCityFilterOptions();
+  }
+
+  // Обновление списка городов в фильтре по всем товарам
+  function updateCityFilterOptions() {
+    const uniqueCities = [...new Set(products.map(p => p.city))];
+    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+    uniqueCities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      filterCitySelect.appendChild(option);
+    });
+  }
+
+  // Фильтры: при изменении данных сразу обновляем таблицу
+  filterNameInput.addEventListener('input', renderCatalog);
+  filterMaxPriceInput.addEventListener('input', renderCatalog);
+  filterSizeInput.addEventListener('input', renderCatalog);
+  filterCitySelect.addEventListener('change', renderCatalog);
+
+  // Инициализация пустого каталога
+  renderCatalog();
+</script>
+
+</body>
+</html>
