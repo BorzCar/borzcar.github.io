@@ -1,194 +1,326 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ru">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BorzWear - Catalogue</title>
+<title>BorzWear - Каталог одежды с контактами</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #fff;
-    color: #007acc;
-    margin: 0;
-    padding: 20px;
+    background: #fafafa;
+    padding: 40px 20px;
+    color: #222;
   }
   h1 {
+    font-size: 2.8rem;
     text-align: center;
-    color: #007acc;
+    margin-bottom: 30px;
   }
-  #filters {
-    margin-bottom: 20px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  form {
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+    background: #fff;
+    padding: 30px 35px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
   }
-  #filters input, #filters select {
-    padding: 6px 8px;
-    font-size: 14px;
-    border: 1px solid #007acc;
-    border-radius: 4px;
-    flex: 1 1 140px;
+  label {
+    display: block;
+    font-size: 1.3rem;
+    margin-top: 20px;
+    margin-bottom: 8px;
   }
-  #catalog {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-  }
-  .item {
-    border: 1px solid #007acc;
-    border-radius: 8px;
-    padding: 10px;
-    width: 220px;
-    cursor: pointer;
-    background: #f0f8ff;
-  }
-  .item img {
+  input[type="text"], input[type="number"], input[type="tel"], select {
     width: 100%;
-    height: 180px;
+    font-size: 1.3rem;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    box-sizing: border-box;
+    transition: border-color 0.25s ease;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, input[type="tel"]:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  input[type="file"] {
+    margin-top: 8px;
+  }
+  button {
+    margin-top: 30px;
+    width: 100%;
+    font-size: 1.6rem;
+    padding: 18px 0;
+    background: #007bff;
+    border: none;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,123,255,0.6);
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  #filterCity {
+    display: block;
+    margin: 0 auto 25px auto;
+    font-size: 1.3rem;
+    padding: 12px 16px;
+    width: 320px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    transition: border-color 0.25s ease;
+  }
+  #filterCity:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  th, td {
+    padding: 18px 22px;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #e6e6e6;
+    vertical-align: middle;
+    text-align: left;
+  }
+  th {
+    background: #007bff;
+    color: white;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  td img {
+    max-width: 80px;
+    max-height: 80px;
+    margin-right: 8px;
+    border-radius: 8px;
     object-fit: cover;
-    border-radius: 6px;
   }
-  .item h3 {
-    margin: 8px 0 4px 0;
-    font-size: 1.1em;
+  .photos-cell {
+    display: flex;
+    gap: 6px;
   }
-  .price {
-    color: #004d99;
-    font-weight: bold;
+  .contact-cell a {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #007bff;
+    border: 1.5px solid #007bff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .contact-cell a:hover {
+    background-color: #007bff;
+    color: white;
   }
 </style>
 </head>
 <body>
 
-<h1>BorzWear - Catalogue</h1>
+<h1>Добавить товар</h1>
+<form id="productForm">
+  <label for="name">Название одежды</label>
+  <input type="text" id="name" required placeholder="Например, Футболка BorzWear" />
 
-<div id="filters">
-  <input type="text" id="filterName" placeholder="Recherche par nom..." />
-  <input type="number" id="filterPriceMin" placeholder="Prix min (€)" min="0" />
-  <input type="number" id="filterPriceMax" placeholder="Prix max (€)" min="0" />
-  <select id="filterSize">
-    <option value="">Taille (toutes)</option>
-    <option value="S">S</option>
-    <option value="M">M</option>
-    <option value="L">L</option>
-    <option value="XL">XL</option>
-  </select>
-  <select id="filterCity">
-    <option value="">Ville (toutes)</option>
-    <option value="Paris">Paris</option>
-    <option value="Marseille">Marseille</option>
-    <option value="Lyon">Lyon</option>
-    <option value="Toulouse">Toulouse</option>
-    <option value="Nice">Nice</option>
-    <option value="Nantes">Nantes</option>
-    <option value="Strasbourg">Strasbourg</option>
-    <option value="Montpellier">Montpellier</option>
-    <option value="Bordeaux">Bordeaux</option>
-    <option value="Lille">Lille</option>
-    <option value="Rennes">Rennes</option>
-    <option value="Reims">Reims</option>
-    <option value="Saint-Étienne">Saint-Étienne</option>
-    <option value="Toulon">Toulon</option>
-    <option value="Grenoble">Grenoble</option>
-    <option value="Dijon">Dijon</option>
-    <option value="Angers">Angers</option>
-    <option value="Nîmes">Nîmes</option>
-    <option value="Valenciennes">Valenciennes</option>
-    <option value="Clermont-Ferrand">Clermont-Ferrand</option>
-  </select>
-</div>
+  <label for="price">Цена (€)</label>
+  <input type="number" id="price" min="0" step="0.01" required placeholder="Введите цену" />
 
-<div id="catalog"></div>
+  <label for="size">Размер</label>
+  <input type="text" id="size" required placeholder="Например, M, L, XL" />
+
+  <label for="phone">Телефон продавца</label>
+  <input type="tel" id="phone" required placeholder="+33 6 12 34 56 78" pattern="^\+?[0-9\s\-]{7,15}$" />
+
+  <label for="citySelect">Выберите город</label>
+  <select id="citySelect">
+    <option value="">-- Выберите город --</option>
+    <option>Анже</option>
+    <option>Бордо</option>
+    <option>Валансьен</option>
+    <option>Гренобль</option>
+    <option>Дижон</option>
+    <option>Клермон-Ферран</option>
+    <option>Лилль</option>
+    <option>Лион</option>
+    <option>Монпелье</option>
+    <option>Нант</option>
+    <option>Ним</option>
+    <option>Ницца</option>
+    <option>Париж</option>
+    <option>Марсель</option>
+    <option>Реймс</option>
+    <option>Ренн</option>
+    <option>Сент-Этьен</option>
+    <option>Страсбург</option>
+    <option>Тулуза</option>
+    <option>Тулон</option>
+  </select>
+
+  <label for="cityInput">Или введите город вручную</label>
+  <input type="text" id="cityInput" placeholder="Например, Лилль" />
+
+  <label for="photos">Загрузите до 3 фото товара</label>
+  <input type="file" id="photos" accept="image/*" multiple />
+
+  <button type="submit">Добавить в каталог</button>
+</form>
+
+<h1>Каталог одежды</h1>
+<label for="filterCity">Фильтр по городу:</label>
+<select id="filterCity">
+  <option value="" selected>Все города</option>
+</select>
+
+<table id="catalogTable">
+  <thead>
+    <tr>
+      <th>Фото</th>
+      <th>Название</th>
+      <th>Цена (€)</th>
+      <th>Размер</th>
+      <th>Город</th>
+      <th>Контакты</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Товары появятся здесь -->
+  </tbody>
+</table>
 
 <script>
-  const products = [
-    {
-      title: "T-shirt imprimé",
-      size: "M",
-      city: "Paris",
-      price: 25,
-      description: "T-shirt élégant avec un imprimé original.",
-      contacts: "Téléphone: +33 123 456 789",
-      photos: [
-        "https://via.placeholder.com/400x300?text=T-shirt+1",
-        "https://via.placeholder.com/400x300?text=T-shirt+2",
-        "https://via.placeholder.com/400x300?text=T-shirt+3"
-      ]
-    },
-    {
-      title: "Jean classique",
-      size: "L",
-      city: "Lyon",
-      price: 45,
-      description: "Jean classique confortable pour un usage quotidien.",
-      contacts: "Email: example@mail.com",
-      photos: [
-        "https://via.placeholder.com/400x300?text=Jean+1",
-        "https://via.placeholder.com/400x300?text=Jean+2"
-      ]
-    },
-    {
-      title: "Veste d'hiver",
-      size: "XL",
-      city: "Marseille",
-      price: 80,
-      description: "Veste chaude pour les journées d'hiver froides.",
-      contacts: "Téléphone: +33 987 654 321",
-      photos: [
-        "https://via.placeholder.com/400x300?text=Veste+1"
-      ]
-    }
-  ];
+  const productForm = document.getElementById('productForm');
+  const catalogTableBody = document.querySelector('#catalogTable tbody');
+  const filterCitySelect = document.getElementById('filterCity');
+  const citySelect = document.getElementById('citySelect');
+  const cityInput = document.getElementById('cityInput');
+  const photosInput = document.getElementById('photos');
+  const phoneInput = document.getElementById('phone');
 
-  const catalogEl = document.getElementById("catalog");
-  const filterName = document.getElementById("filterName");
-  const filterPriceMin = document.getElementById("filterPriceMin");
-  const filterPriceMax = document.getElementById("filterPriceMax");
-  const filterSize = document.getElementById("filterSize");
-  const filterCity = document.getElementById("filterCity");
+  let products = [];
 
-  function renderCatalog(items) {
-    catalogEl.innerHTML = "";
-    if (items.length === 0) {
-      catalogEl.innerHTML = "<p>Aucun produit trouvé.</p>";
+  citySelect.addEventListener('change', () => {
+    cityInput.value = citySelect.value;
+  });
+
+  productForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    let city = cityInput.value.trim() || citySelect.value.trim();
+    if (!city) {
+      alert('Пожалуйста, укажите город (выберите или введите вручную)');
       return;
     }
-    items.forEach((prod, idx) => {
-      const item = document.createElement("div");
-      item.className = "item";
-      item.innerHTML = `
-        <img src="${prod.photos[0]}" alt="${prod.title}" />
-        <h3>${prod.title}</h3>
-        <div class="price">${prod.price} €</div>
+
+    if (!phoneInput.value.trim()) {
+      alert('Пожалуйста, укажите телефон продавца');
+      return;
+    }
+
+    const files = photosInput.files;
+    if (files.length > 3) {
+      alert('Можно загрузить максимум 3 фото');
+      return;
+    }
+
+    const photosData = [];
+    for (let i = 0; i < files.length; i++) {
+      photosData.push(await readFileAsDataURL(files[i]));
+    }
+
+    const newProduct = {
+      name: productForm.name.value.trim(),
+      price: parseFloat(productForm.price.value).toFixed(2),
+      size: productForm.size.value.trim(),
+      city: city,
+      phone: phoneInput.value.trim(),
+      photos: photosData,
+    };
+
+    products.push(newProduct);
+    renderCatalog(filterCitySelect.value);
+    productForm.reset();
+    cityInput.value = '';
+    citySelect.value = '';
+    photosInput.value = null;
+  });
+
+  filterCitySelect.addEventListener('change', () => {
+    renderCatalog(filterCitySelect.value);
+  });
+
+  function renderCatalog(filterCity = '') {
+    catalogTableBody.innerHTML = '';
+
+    let filteredProducts = products;
+    if (filterCity) {
+      filteredProducts = products.filter(p => p.city.toLowerCase() === filterCity.toLowerCase());
+    }
+
+    updateCityFilterOptions();
+
+    filteredProducts.forEach(product => {
+      const photosHtml = product.photos.length
+        ? product.photos.map(src => `<img src="${src}" alt="Фото товара">`).join('')
+        : 'Нет фото';
+
+      // Кнопки контакта
+      // Телефонный звонок:
+      const phoneLink = `<a href="tel:${product.phone}" title="Позвонить продавцу">&#128222;</a>`;
+      // WhatsApp (если номер в международном формате +33...):
+      // Убираем все кроме цифр и плюс
+      const phoneDigits = product.phone.replace(/[^+\d]/g, '');
+      const whatsappLink = `<a href="https://wa.me/${phoneDigits.replace('+', '')}" target="_blank" title="Написать в WhatsApp">&#128241;</a>`;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="photos-cell">${photosHtml}</td>
+        <td>${product.name}</td>
+        <td>€${product.price}</td>
+        <td>${product.size}</td>
+        <td>${product.city}</td>
+        <td class="contact-cell">${phoneLink} ${whatsappLink}</td>
       `;
-      catalogEl.appendChild(item);
+      catalogTableBody.appendChild(tr);
     });
   }
 
-  function filterProducts() {
-    let filtered = products.filter(prod => {
-      const nameMatch = prod.title.toLowerCase().includes(filterName.value.toLowerCase());
-      const priceMin = filterPriceMin.value ? Number(filterPriceMin.value) : 0;
-      const priceMax = filterPriceMax.value ? Number(filterPriceMax.value) : Infinity;
-      const priceMatch = prod.price >= priceMin && prod.price <= priceMax;
-      const sizeMatch = filterSize.value ? prod.size === filterSize.value : true;
-      const cityMatch = filterCity.value ? prod.city === filterCity.value : true;
-      return nameMatch && priceMatch && sizeMatch && cityMatch;
+  function updateCityFilterOptions() {
+    const current = filterCitySelect.value;
+    const cities = [...new Set(products.map(p => p.city).filter(c => c.trim() !== ''))].sort();
+
+    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      filterCitySelect.appendChild(option);
     });
-    renderCatalog(filtered);
+
+    if (cities.includes(current)) {
+      filterCitySelect.value = current;
+    }
   }
 
-  filterName.addEventListener("input", filterProducts);
-  filterPriceMin.addEventListener("input", filterProducts);
-  filterPriceMax.addEventListener("input", filterProducts);
-  filterSize.addEventListener("change", filterProducts);
-  filterCity.addEventListener("change", filterProducts);
-
-  renderCatalog(products);
+  function readFileAsDataURL(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
 </script>
 
 </body>
