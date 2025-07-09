@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BorzWear - Каталог одежды</title>
+<title>BorzWear - Каталог одежды с выбором города на карте</title>
+
+<!-- Подключаем Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-sA+ePHmIu1C6/YhdmM32Hp6ErbZep9gSezOlWZy+0/8="
+  crossorigin=""
+/>
+
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -17,8 +26,8 @@
     margin-bottom: 30px;
   }
   form {
-    max-width: 650px;
-    margin: 0 auto 50px auto;
+    max-width: 700px;
+    margin: 0 auto 40px auto;
     background: #fff;
     padding: 30px 35px;
     border-radius: 14px;
@@ -95,7 +104,14 @@
   tr:last-child td {
     border-bottom: none;
   }
+  #map {
+    height: 350px;
+    border-radius: 12px;
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
 </style>
+
 </head>
 <body>
 
@@ -110,21 +126,10 @@
   <label for="size">Размер</label>
   <input type="text" id="size" required placeholder="Например, M, L, XL" />
 
-  <label for="city">Город</label>
-  <select id="city" required>
-    <option value="" disabled selected>Выберите город</option>
-    <option>Москва</option>
-    <option>Санкт-Петербург</option>
-    <option>Новосибирск</option>
-    <option>Екатеринбург</option>
-    <option>Казань</option>
-    <option>Нижний Новгород</option>
-    <option>Челябинск</option>
-    <option>Самара</option>
-    <option>Ростов-на-Дону</option>
-    <option>Уфа</option>
-    <option>Красноярск</option>
-  </select>
+  <label for="city">Город (выберите на карте или впишите вручную)</label>
+  <input type="text" id="city" required placeholder="Город появится после выбора на карте" />
+
+  <div id="map"></div>
 
   <button type="submit">Добавить в каталог</button>
 </form>
@@ -133,17 +138,6 @@
 <label for="filterCity">Фильтр по городу:</label>
 <select id="filterCity">
   <option value="" selected>Все города</option>
-  <option>Москва</option>
-  <option>Санкт-Петербург</option>
-  <option>Новосибирск</option>
-  <option>Екатеринбург</option>
-  <option>Казань</option>
-  <option>Нижний Новгород</option>
-  <option>Челябинск</option>
-  <option>Самара</option>
-  <option>Ростов-на-Дону</option>
-  <option>Уфа</option>
-  <option>Красноярск</option>
 </select>
 
 <table id="catalogTable">
@@ -160,20 +154,66 @@
   </tbody>
 </table>
 
+<!-- Подключаем Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-oCokGnpTRqj+rjoXrZ5DwZ5k3nGTPsW/2w24f5YdF3g="
+  crossorigin=""
+></script>
+
 <script>
   const productForm = document.getElementById('productForm');
   const catalogTableBody = document.querySelector('#catalogTable tbody');
   const filterCitySelect = document.getElementById('filterCity');
+  const cityInput = document.getElementById('city');
 
   let products = [];
 
+  // Инициализируем карту Leaflet
+  const map = L.map('map').setView([46.603354, 1.888334], 6); // Центр Франции
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  let marker;
+
+  // При клике на карту ставим маркер и делаем обратное геокодирование
+  map.on('click', async function(e) {
+    const { lat, lng } = e.latlng;
+
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    marker = L.marker([lat, lng]).addTo(map);
+
+    // Обратное геокодирование через Nominatim OpenStreetMap
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+
+    try {
+      const response = await fetch(url, { headers: { 'Accept-Language': 'ru' } });
+      const data = await response.json();
+      // Ищем город в ответе
+      const address = data.address;
+      let city = address.city || address.town || address.village || address.county || '';
+      cityInput.value = city;
+    } catch (error) {
+      console.log('Ошибка обратного геокодирования:', error);
+      cityInput.value = '';
+    }
+  });
+
+  // Функция отрисовки каталога с фильтром по городу
   function renderCatalog(filterCity = '') {
     catalogTableBody.innerHTML = '';
 
     let filteredProducts = products;
     if (filterCity) {
-      filteredProducts = products.filter(p => p.city === filterCity);
+      filteredProducts = products.filter(p => p.city.toLowerCase() === filterCity.toLowerCase());
     }
+
+    // Обновляем список городов в фильтре по всем товарам
+    updateCityFilterOptions();
 
     filteredProducts.forEach(product => {
       const tr = document.createElement('tr');
@@ -187,6 +227,30 @@
     });
   }
 
+  // Обновляем опции фильтра городов, чтобы не дублировать
+  function updateCityFilterOptions() {
+    // Сохраняем текущий выбранный город
+    const current = filterCitySelect.value;
+
+    // Собираем уникальные города
+    const cities = [...new Set(products.map(p => p.city).filter(c => c.trim() !== ''))].sort();
+
+    // Очищаем селект и добавляем "Все города"
+    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      filterCitySelect.appendChild(option);
+    });
+
+    // Восстанавливаем выбранное значение, если оно есть
+    if (cities.includes(current)) {
+      filterCitySelect.value = current;
+    }
+  }
+
   productForm.addEventListener('submit', e => {
     e.preventDefault();
 
@@ -194,22 +258,8 @@
       name: productForm.name.value.trim(),
       price: productForm.price.value.trim(),
       size: productForm.size.value.trim(),
-      city: productForm.city.value,
+      city: productForm.city.value.trim(),
     };
 
-    products.push(newProduct);
-
-    productForm.reset();
-    filterCitySelect.value = ''; // сбросить фильтр при добавлении
-    renderCatalog();
-  });
-
-  filterCitySelect.addEventListener('change', () => {
-    renderCatalog(filterCitySelect.value);
-  });
-
-  renderCatalog();
-</script>
-
-</body>
-</html>
+    if (!newProduct.city) {
+      alert('Пожалуйста, у
