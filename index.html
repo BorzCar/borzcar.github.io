@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -53,4 +54,187 @@
     color: white;
     border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 4px 12p
+    box-shadow: 0 4px 12px rgba(0,123,255,0.6);
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  #filterCity {
+    display: block;
+    margin: 0 auto 25px auto;
+    font-size: 1.3rem;
+    padding: 12px 16px;
+    width: 320px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    transition: border-color 0.25s ease;
+  }
+  #filterCity:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  th, td {
+    padding: 18px 22px;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #e6e6e6;
+    text-align: left;
+  }
+  th {
+    background: #007bff;
+    color: white;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Добавить товар</h1>
+<form id="productForm">
+  <label for="name">Название одежды</label>
+  <input type="text" id="name" required placeholder="Например, Футболка BorzWear" />
+
+  <label for="price">Цена (€)</label>
+  <input type="number" id="price" min="0" step="0.01" required placeholder="Введите цену" />
+
+  <label for="size">Размер</label>
+  <input type="text" id="size" required placeholder="Например, M, L, XL" />
+
+  <label for="citySelect">Выберите город</label>
+  <select id="citySelect">
+    <option value="">-- Выберите город --</option>
+    <option>Париж</option>
+    <option>Марсель</option>
+    <option>Лион</option>
+    <option>Тулуза</option>
+    <option>Ницца</option>
+    <option>Нант</option>
+    <option>Страсбург</option>
+    <option>Монпелье</option>
+    <option>Бордо</option>
+    <option>Лилль</option>
+    <option>Ренн</option>
+  </select>
+
+  <label for="cityInput">Или введите город вручную</label>
+  <input type="text" id="cityInput" placeholder="Например, Лилль" />
+
+  <button type="submit">Добавить в каталог</button>
+</form>
+
+<h1>Каталог одежды</h1>
+<label for="filterCity">Фильтр по городу:</label>
+<select id="filterCity">
+  <option value="" selected>Все города</option>
+</select>
+
+<table id="catalogTable">
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Цена (€)</th>
+      <th>Размер</th>
+      <th>Город</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Товары появятся здесь -->
+  </tbody>
+</table>
+
+<script>
+  const productForm = document.getElementById('productForm');
+  const catalogTableBody = document.querySelector('#catalogTable tbody');
+  const filterCitySelect = document.getElementById('filterCity');
+  const citySelect = document.getElementById('citySelect');
+  const cityInput = document.getElementById('cityInput');
+
+  let products = [];
+
+  // При выборе города из списка - подставляем в поле ввода
+  citySelect.addEventListener('change', () => {
+    cityInput.value = citySelect.value;
+  });
+
+  productForm.addEventListener('submit', e => {
+    e.preventDefault();
+
+    // Берём город из поля ввода, если оно пустое, берём из селекта
+    let city = cityInput.value.trim() || citySelect.value.trim();
+    if (!city) {
+      alert('Пожалуйста, укажите город (выберите или введите вручную)');
+      return;
+    }
+
+    const newProduct = {
+      name: productForm.name.value.trim(),
+      price: parseFloat(productForm.price.value).toFixed(2),
+      size: productForm.size.value.trim(),
+      city: city,
+    };
+
+    products.push(newProduct);
+    renderCatalog(filterCitySelect.value);
+    productForm.reset();
+    cityInput.value = '';
+    citySelect.value = '';
+  });
+
+  filterCitySelect.addEventListener('change', () => {
+    renderCatalog(filterCitySelect.value);
+  });
+
+  function renderCatalog(filterCity = '') {
+    catalogTableBody.innerHTML = '';
+
+    let filteredProducts = products;
+    if (filterCity) {
+      filteredProducts = products.filter(p => p.city.toLowerCase() === filterCity.toLowerCase());
+    }
+
+    updateCityFilterOptions();
+
+    filteredProducts.forEach(product => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${product.name}</td>
+        <td>€${product.price}</td>
+        <td>${product.size}</td>
+        <td>${product.city}</td>
+      `;
+      catalogTableBody.appendChild(tr);
+    });
+  }
+
+  function updateCityFilterOptions() {
+    const current = filterCitySelect.value;
+    const cities = [...new Set(products.map(p => p.city).filter(c => c.trim() !== ''))].sort();
+
+    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+
+    cities.forEach(city => {
+      const option = document.createElement('option');
+      option.value = city;
+      option.textContent = city;
+      filterCitySelect.appendChild(option);
+    });
+
+    if (cities.includes(current)) {
+      filterCitySelect.value = current;
+    }
+  }
+</script>
+
+</body>
+</html>
