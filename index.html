@@ -76,6 +76,29 @@
     border-color: #007bff;
     outline: none;
   }
+  /* Новый фильтр */
+  #filterBlock {
+    max-width: 700px;
+    margin: 0 auto 20px auto;
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  #filterBlock label {
+    font-size: 1.3rem;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  #filterBlock input {
+    width: 100%;
+    font-size: 1.3rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    box-sizing: border-box;
+  }
   table {
     width: 90%;
     margin: 0 auto;
@@ -178,6 +201,19 @@
 </form>
 
 <h1>Каталог одежды</h1>
+
+<!-- Новый блок фильтров -->
+<div id="filterBlock">
+  <label for="filterName">Поиск по названию:</label>
+  <input type="text" id="filterName" placeholder="Введите название..." />
+
+  <label for="filterMaxPrice">Максимальная цена (€):</label>
+  <input type="number" id="filterMaxPrice" min="0" step="0.01" placeholder="Любая" />
+
+  <label for="filterSize">Размер:</label>
+  <input type="text" id="filterSize" placeholder="Например, M, L, XL" />
+</div>
+
 <label for="filterCity">Фильтр по городу:</label>
 <select id="filterCity">
   <option value="" selected>Все города</option>
@@ -207,6 +243,11 @@
   const cityInput = document.getElementById('cityInput');
   const photosInput = document.getElementById('photos');
   const phoneInput = document.getElementById('phone');
+
+  // Новые фильтры
+  const filterNameInput = document.getElementById('filterName');
+  const filterMaxPriceInput = document.getElementById('filterMaxPrice');
+  const filterSizeInput = document.getElementById('filterSize');
 
   let products = [];
 
@@ -249,79 +290,21 @@
     };
 
     products.push(newProduct);
-    renderCatalog(filterCitySelect.value);
+    renderCatalog();
     productForm.reset();
     cityInput.value = '';
     citySelect.value = '';
     photosInput.value = null;
   });
 
-  filterCitySelect.addEventListener('change', () => {
-    renderCatalog(filterCitySelect.value);
-  });
+  // Отрисовка каталога с фильтрами
+  function renderCatalog() {
+    const nameFilter = filterNameInput.value.trim().toLowerCase();
+    const maxPriceFilter = parseFloat(filterMaxPriceInput.value);
+    const sizeFilter = filterSizeInput.value.trim().toLowerCase();
+    const cityFilter = filterCitySelect.value.trim().toLowerCase();
 
-  function renderCatalog(filterCity = '') {
     catalogTableBody.innerHTML = '';
 
-    let filteredProducts = products;
-    if (filterCity) {
-      filteredProducts = products.filter(p => p.city.toLowerCase() === filterCity.toLowerCase());
-    }
-
-    updateCityFilterOptions();
-
-    filteredProducts.forEach(product => {
-      const photosHtml = product.photos.length
-        ? product.photos.map(src => `<img src="${src}" alt="Фото товара">`).join('')
-        : 'Нет фото';
-
-      // Кнопки контакта
-      // Телефонный звонок:
-      const phoneLink = `<a href="tel:${product.phone}" title="Позвонить продавцу">&#128222;</a>`;
-      // WhatsApp (если номер в международном формате +33...):
-      // Убираем все кроме цифр и плюс
-      const phoneDigits = product.phone.replace(/[^+\d]/g, '');
-      const whatsappLink = `<a href="https://wa.me/${phoneDigits.replace('+', '')}" target="_blank" title="Написать в WhatsApp">&#128241;</a>`;
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="photos-cell">${photosHtml}</td>
-        <td>${product.name}</td>
-        <td>€${product.price}</td>
-        <td>${product.size}</td>
-        <td>${product.city}</td>
-        <td class="contact-cell">${phoneLink} ${whatsappLink}</td>
-      `;
-      catalogTableBody.appendChild(tr);
-    });
-  }
-
-  function updateCityFilterOptions() {
-    const current = filterCitySelect.value;
-    const cities = [...new Set(products.map(p => p.city).filter(c => c.trim() !== ''))].sort();
-
-    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
-
-    cities.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city;
-      option.textContent = city;
-      filterCitySelect.appendChild(option);
-    });
-
-    if (cities.includes(current)) {
-      filterCitySelect.value = current;
-    }
-  }
-
-  function readFileAsDataURL(file) {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  }
-</script>
-
-</body>
-</html>
+    // Фильтруем товары по всем критериям
+    let filteredProducts = products.filter(product
