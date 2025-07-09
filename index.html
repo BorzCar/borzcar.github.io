@@ -62,9 +62,9 @@
   button:hover {
     background: #0056b3;
   }
-  #filterCity {
+  #filterCity, #sortSelect, #searchName {
     display: block;
-    margin: 0 auto 25px auto;
+    margin: 0 auto 15px auto;
     font-size: 1.3rem;
     padding: 12px 16px;
     width: 320px;
@@ -72,7 +72,7 @@
     border: 1.8px solid #ccc;
     transition: border-color 0.25s ease;
   }
-  #filterCity:focus {
+  #filterCity:focus, #sortSelect:focus, #searchName:focus {
     border-color: #007bff;
     outline: none;
   }
@@ -178,9 +178,24 @@
 </form>
 
 <h1>Каталог одежды</h1>
+
+<label for="searchName">Поиск по названию:</label>
+<input type="text" id="searchName" placeholder="Введите название для поиска" />
+
 <label for="filterCity">Фильтр по городу:</label>
 <select id="filterCity">
   <option value="" selected>Все города</option>
+</select>
+
+<label for="sortSelect">Сортировка:</label>
+<select id="sortSelect">
+  <option value="none" selected>Без сортировки</option>
+  <option value="name-asc">Название (А→Я)</option>
+  <option value="name-desc">Название (Я→А)</option>
+  <option value="price-asc">Цена (возрастание)</option>
+  <option value="price-desc">Цена (убывание)</option>
+  <option value="size-asc">Размер (А→Я)</option>
+  <option value="size-desc">Размер (Я→А)</option>
 </select>
 
 <table id="catalogTable">
@@ -207,17 +222,10 @@
   const cityInput = document.getElementById('cityInput');
   const photosInput = document.getElementById('photos');
   const phoneInput = document.getElementById('phone');
+  const searchNameInput = document.getElementById('searchName');
+  const sortSelect = document.getElementById('sortSelect');
 
   let products = [];
-
-  // Загрузка данных из localStorage при старте
-  window.addEventListener('load', () => {
-    const savedProducts = localStorage.getItem('borzwearProducts');
-    if (savedProducts) {
-      products = JSON.parse(savedProducts);
-    }
-    renderCatalog(filterCitySelect.value);
-  });
 
   citySelect.addEventListener('change', () => {
     cityInput.value = citySelect.value;
@@ -259,23 +267,56 @@
 
     products.push(newProduct);
     saveProducts();
-    renderCatalog(filterCitySelect.value);
+    renderCatalog();
     productForm.reset();
     cityInput.value = '';
     citySelect.value = '';
     photosInput.value = null;
   });
 
-  filterCitySelect.addEventListener('change', () => {
-    renderCatalog(filterCitySelect.value);
-  });
+  filterCitySelect.addEventListener('change', renderCatalog);
+  searchNameInput.addEventListener('input', renderCatalog);
+  sortSelect.addEventListener('change', renderCatalog);
 
-  function renderCatalog(filterCity = '') {
+  function renderCatalog() {
     catalogTableBody.innerHTML = '';
 
     let filteredProducts = products;
-    if (filterCity) {
-      filteredProducts = products.filter(p => p.city.toLowerCase() === filterCity.toLowerCase());
+
+    // Фильтр по городу
+    const cityFilter = filterCitySelect.value.trim().toLowerCase();
+    if (cityFilter) {
+      filteredProducts = filteredProducts.filter(p => p.city.toLowerCase() === cityFilter);
+    }
+
+    // Поиск по названию (подстрока)
+    const searchName = searchNameInput.value.trim().toLowerCase();
+    if (searchName) {
+      filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(searchName));
+    }
+
+    // Сортировка
+    const sortValue = sortSelect.value;
+    if (sortValue !== 'none') {
+      const [field, order] = sortValue.split('-');
+      filteredProducts.sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+
+        // Для цены - числовое сравнение
+        if (field === 'price') {
+          valA = parseFloat(valA);
+          valB = parseFloat(valB);
+        } else {
+          // Для названия и размера - строковое сравнение по локали
+          valA = valA.toLowerCase();
+          valB = valB.toLowerCase();
+        }
+
+        if (valA < valB) return order === 'asc' ? -1 : 1;
+        if (valA > valB) return order === 'asc' ? 1 : -1;
+        return 0;
+      });
     }
 
     updateCityFilterOptions();
@@ -285,10 +326,8 @@
         ? product.photos.map(src => `<img src="${src}" alt="Фото товара">`).join('')
         : 'Нет фото';
 
-      // Кнопки контакта
-      // Телефонный звонок:
+      // Контакты
       const phoneLink = `<a href="tel:${product.phone}" title="Позвонить продавцу">&#128222;</a>`;
-      // WhatsApp (если номер в международном формате +33...):
       const phoneDigits = product.phone.replace(/[^+\d]/g, '');
       const whatsappLink = `<a href="https://wa.me/${phoneDigits.replace('+', '')}" target="_blank" title="Написать в WhatsApp">&#128241;</a>`;
 
@@ -309,7 +348,7 @@
     const current = filterCitySelect.value;
     const cities = [...new Set(products.map(p => p.city).filter(c => c.trim() !== ''))].sort();
 
-    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+    filterCitySelect.innerHTML = '<option value="">Все города</option>';
 
     cities.forEach(city => {
       const option = document.createElement('option');
@@ -323,10 +362,6 @@
     }
   }
 
-  function saveProducts() {
-    localStorage.setItem('borzwearProducts', JSON.stringify(products));
-  }
-
   function readFileAsDataURL(file) {
     return new Promise(resolve => {
       const reader = new FileReader();
@@ -334,6 +369,23 @@
       reader.readAsDataURL(file);
     });
   }
+
+  // Сохраняем товары в localStorage
+  function saveProducts() {
+    localStorage.setItem('borzwearProducts', JSON.stringify(products));
+  }
+
+  // Загружаем товары из localStorage
+  function loadProducts() {
+    const saved = localStorage.getItem('borzwearProducts');
+    if (saved) {
+      products = JSON.parse(saved);
+    }
+  }
+
+  // При загрузке страницы
+  loadProducts();
+  renderCatalog();
 </script>
 
 </body>
