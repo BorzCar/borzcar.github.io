@@ -221,4 +221,91 @@ document.getElementById('sellForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const form = e.target;
 
-  const productName = form.product
+  const productName = form.productName.value.trim();
+  const price = parseFloat(form.price.value);
+  const city = form.city.value;
+  const contactMethod = form.contactMethod.value;
+  const phone = form.phone.value.trim();
+  const email = form.email.value.trim();
+  const photosInput = form.photos;
+
+  if (!productName || isNaN(price) || !city || !contactMethod) {
+    alert('Пожалуйста, заполните все обязательные поля');
+    return;
+  }
+  if (contactMethod === 'phone' && !phone) {
+    alert('Введите телефон');
+    return;
+  }
+  if (contactMethod === 'email' && !email) {
+    alert('Введите email');
+    return;
+  }
+
+  const files = photosInput.files;
+  if (files.length === 0) {
+    alert('Добавьте хотя бы одну фотографию');
+    return;
+  }
+  if (files.length > 3) {
+    alert('Максимум 3 фотографии');
+    return;
+  }
+
+  const photosBase64 = [];
+
+  let filesProcessed = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      photosBase64.push(event.target.result);
+      filesProcessed++;
+      if (filesProcessed === files.length) {
+        // Добавляем товар после загрузки всех фото
+        const newItem = {
+          productName,
+          price,
+          city,
+          contactMethod,
+          phone,
+          email,
+          photos: photosBase64
+        };
+        catalog.push(newItem);
+        saveCatalogToStorage();
+        renderCatalog();
+        form.reset();
+        toggleContactInput();
+      }
+    }
+    reader.readAsDataURL(file);
+  }
+});
+
+// Модальное окно
+const modal = document.getElementById('modal');
+const modalClose = document.getElementById('modal-close');
+const modalImage = document.getElementById('modal-image');
+const modalCaption = document.getElementById('modal-caption');
+const modalPrev = document.getElementById('modal-prev');
+const modalNext = document.getElementById('modal-next');
+
+let currentModalIndex = 0;
+let currentPhotoIndex = 0;
+
+modalClose.onclick = () => closeModal();
+modalPrev.onclick = () => { prevPhoto(); };
+modalNext.onclick = () => { nextPhoto(); };
+modal.onclick = (e) => {
+  if (e.target === modal) closeModal();
+};
+
+loadCatalogFromStorage();
+renderCatalog();
+toggleContactInput();
+</script>
+
+</body>
+</html>
