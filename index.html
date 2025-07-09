@@ -190,6 +190,7 @@
 
   let products = [];
 
+  // При выборе города из списка — вставляем в ручной ввод
   citySelect.addEventListener('change', () => {
     cityInput.value = citySelect.value;
   });
@@ -247,12 +248,11 @@
     updateCityFilterOptions();
 
     filteredProducts.forEach(product => {
-      const tr = document.createElement('tr');
-
       const photosHtml = product.photos.length
         ? product.photos.map(src => `<img src="${src}" alt="Фото товара">`).join('')
         : 'Нет фото';
 
+      const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="photos-cell">${photosHtml}</td>
         <td>${product.name}</td>
@@ -278,4 +278,18 @@
     });
 
     if (cities.includes(current)) {
-     
+      filterCitySelect.value = current;
+    }
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+</script>
+
+</body>
+</html>
