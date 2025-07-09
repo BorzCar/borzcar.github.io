@@ -1,326 +1,153 @@
-   <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BorzWear - Каталог одежды с контактами</title>
+<title>BorzWear Каталог</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #fafafa;
-    padding: 40px 20px;
-    color: #222;
-  }
-  h1 {
-    font-size: 2.8rem;
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  form {
-    max-width: 700px;
-    margin: 0 auto 40px auto;
-    background: #fff;
-    padding: 30px 35px;
-    border-radius: 14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-  }
-  label {
-    display: block;
-    font-size: 1.3rem;
-    margin-top: 20px;
-    margin-bottom: 8px;
-  }
-  input[type="text"], input[type="number"], input[type="tel"], select {
-    width: 100%;
-    font-size: 1.3rem;
-    padding: 14px 16px;
-    border-radius: 8px;
-    border: 1.8px solid #ccc;
-    box-sizing: border-box;
-    transition: border-color 0.25s ease;
-  }
-  input[type="text"]:focus, input[type="number"]:focus, input[type="tel"]:focus, select:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-  input[type="file"] {
-    margin-top: 8px;
-  }
-  button {
-    margin-top: 30px;
-    width: 100%;
-    font-size: 1.6rem;
-    padding: 18px 0;
-    background: #007bff;
-    border: none;
-    color: white;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,123,255,0.6);
-    transition: background 0.3s ease;
-  }
-  button:hover {
-    background: #0056b3;
-  }
-  #filterCity {
-    display: block;
-    margin: 0 auto 25px auto;
-    font-size: 1.3rem;
-    padding: 12px 16px;
-    width: 320px;
-    border-radius: 8px;
-    border: 1.8px solid #ccc;
-    transition: border-color 0.25s ease;
-  }
-  #filterCity:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-  table {
-    width: 90%;
-    margin: 0 auto;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-  }
-  th, td {
-    padding: 18px 22px;
-    font-size: 1.3rem;
-    border-bottom: 1px solid #e6e6e6;
-    vertical-align: middle;
-    text-align: left;
-  }
-  th {
-    background: #007bff;
-    color: white;
-  }
-  tr:last-child td {
-    border-bottom: none;
-  }
-  td img {
-    max-width: 80px;
-    max-height: 80px;
-    margin-right: 8px;
-    border-radius: 8px;
-    object-fit: cover;
-  }
-  .photos-cell {
-    display: flex;
-    gap: 6px;
-  }
-  .contact-cell a {
-    display: inline-block;
-    margin-right: 10px;
-    font-size: 1.2rem;
-    text-decoration: none;
-    color: #007bff;
-    border: 1.5px solid #007bff;
-    border-radius: 8px;
-    padding: 6px 10px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  .contact-cell a:hover {
-    background-color: #007bff;
-    color: white;
-  }
+  body { font-family: Arial, sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+  form { margin-bottom: 30px; background: #f9f9f9; padding: 15px; border-radius: 6px; }
+  label { display: block; margin-bottom: 10px; }
+  input, select, button { padding: 8px; font-size: 16px; width: 100%; box-sizing: border-box; margin-top: 4px; }
+  #contactPhone, #contactEmail { margin-top: 10px; }
+  .product { border: 1px solid #ccc; padding: 12px; margin-bottom: 15px; border-radius: 6px; background: #fff; }
+  .product h3 { margin: 0 0 8px 0; }
+  .contact { margin-top: 6px; font-weight: bold; }
 </style>
 </head>
 <body>
 
-<h1>Добавить товар</h1>
-<form id="productForm">
-  <label for="name">Название одежды</label>
-  <input type="text" id="name" required placeholder="Например, Футболка BorzWear" />
+<h1>Добавить товар в каталог BorzWear</h1>
+<form id="sellForm">
+  <label>
+    Название товара:
+    <input type="text" name="productName" required />
+  </label>
 
-  <label for="price">Цена (€)</label>
-  <input type="number" id="price" min="0" step="0.01" required placeholder="Введите цену" />
+  <label>
+    Цена (€):
+    <input type="number" name="price" required min="0" />
+  </label>
 
-  <label for="size">Размер</label>
-  <input type="text" id="size" required placeholder="Например, M, L, XL" />
+  <label>
+    Город:
+    <select name="city" required>
+      <option value="">Выберите город</option>
+      <option value="Angers">Angers</option>
+      <option value="Bordeaux">Bordeaux</option>
+      <option value="Clermont-Ferrand">Clermont-Ferrand</option>
+      <option value="Dijon">Dijon</option>
+      <option value="Grenoble">Grenoble</option>
+      <option value="Lille">Lille</option>
+      <option value="Lyon">Lyon</option>
+      <option value="Marseille">Marseille</option>
+      <option value="Montpellier">Montpellier</option>
+      <option value="Nantes">Nantes</option>
+      <option value="Nice">Nice</option>
+      <option value="Nîmes">Nîmes</option>
+      <option value="Paris">Paris</option>
+      <option value="Reims">Reims</option>
+      <option value="Rennes">Rennes</option>
+      <option value="Saint-Étienne">Saint-Étienne</option>
+      <option value="Strasbourg">Strasbourg</option>
+      <option value="Toulon">Toulon</option>
+      <option value="Toulouse">Toulouse</option>
+      <option value="Valenciennes">Valenciennes</option>
+    </select>
+  </label>
 
-  <label for="phone">Телефон продавца</label>
-  <input type="tel" id="phone" required placeholder="+33 6 12 34 56 78" pattern="^\+?[0-9\s\-]{7,15}$" />
+  <label>
+    Способ связи:
+    <select id="contactMethod" name="contactMethod" required onchange="toggleContactInput()">
+      <option value="">Выберите</option>
+      <option value="phone">Телефон</option>
+      <option value="email">Email</option>
+    </select>
+  </label>
 
-  <label for="citySelect">Выберите город</label>
-  <select id="citySelect">
-    <option value="">-- Выберите город --</option>
-    <option>Анже</option>
-    <option>Бордо</option>
-    <option>Валансьен</option>
-    <option>Гренобль</option>
-    <option>Дижон</option>
-    <option>Клермон-Ферран</option>
-    <option>Лилль</option>
-    <option>Лион</option>
-    <option>Монпелье</option>
-    <option>Нант</option>
-    <option>Ним</option>
-    <option>Ницца</option>
-    <option>Париж</option>
-    <option>Марсель</option>
-    <option>Реймс</option>
-    <option>Ренн</option>
-    <option>Сент-Этьен</option>
-    <option>Страсбург</option>
-    <option>Тулуза</option>
-    <option>Тулон</option>
-  </select>
+  <div id="contactPhone" style="display:none;">
+    <label>
+      Введите телефон:
+      <input type="tel" name="phone" />
+    </label>
+  </div>
 
-  <label for="cityInput">Или введите город вручную</label>
-  <input type="text" id="cityInput" placeholder="Например, Лилль" />
-
-  <label for="photos">Загрузите до 3 фото товара</label>
-  <input type="file" id="photos" accept="image/*" multiple />
+  <div id="contactEmail" style="display:none;">
+    <label>
+      Введите email:
+      <input type="email" name="email" />
+    </label>
+  </div>
 
   <button type="submit">Добавить в каталог</button>
 </form>
 
-<h1>Каталог одежды</h1>
-<label for="filterCity">Фильтр по городу:</label>
-<select id="filterCity">
-  <option value="" selected>Все города</option>
-</select>
-
-<table id="catalogTable">
-  <thead>
-    <tr>
-      <th>Фото</th>
-      <th>Название</th>
-      <th>Цена (€)</th>
-      <th>Размер</th>
-      <th>Город</th>
-      <th>Контакты</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Товары появятся здесь -->
-  </tbody>
-</table>
+<h2>Каталог товаров</h2>
+<div id="catalog"></div>
 
 <script>
-  const productForm = document.getElementById('productForm');
-  const catalogTableBody = document.querySelector('#catalogTable tbody');
-  const filterCitySelect = document.getElementById('filterCity');
-  const citySelect = document.getElementById('citySelect');
-  const cityInput = document.getElementById('cityInput');
-  const photosInput = document.getElementById('photos');
-  const phoneInput = document.getElementById('phone');
+function toggleContactInput() {
+  const method = document.getElementById('contactMethod').value;
+  document.getElementById('contactPhone').style.display = method === 'phone' ? 'block' : 'none';
+  document.getElementById('contactEmail').style.display = method === 'email' ? 'block' : 'none';
+}
 
-  let products = [];
-
-  citySelect.addEventListener('change', () => {
-    cityInput.value = citySelect.value;
+function loadCatalog() {
+  const catalogDiv = document.getElementById('catalog');
+  catalogDiv.innerHTML = '';
+  const items = JSON.parse(localStorage.getItem('borzwearCatalog') || '[]');
+  if (items.length === 0) {
+    catalogDiv.innerHTML = '<p>Каталог пуст.</p>';
+    return;
+  }
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'product';
+    div.innerHTML = `
+      <h3>${item.productName}</h3>
+      <div>Цена: €${item.price}</div>
+      <div>Город: ${item.city}</div>
+      <div class="contact">Связь: ${item.contactMethod === 'phone' ? 'Телефон: ' + item.phone : 'Email: ' + item.email}</div>
+    `;
+    catalogDiv.appendChild(div);
   });
+}
 
-  productForm.addEventListener('submit', async e => {
-    e.preventDefault();
+document.getElementById('sellForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = e.target;
 
-    let city = cityInput.value.trim() || citySelect.value.trim();
-    if (!city) {
-      alert('Пожалуйста, укажите город (выберите или введите вручную)');
-      return;
-    }
+  const productName = form.productName.value.trim();
+  const price = form.price.value;
+  const city = form.city.value;
+  const contactMethod = form.contactMethod.value;
+  const phone = form.phone.value.trim();
+  const email = form.email.value.trim();
 
-    if (!phoneInput.value.trim()) {
-      alert('Пожалуйста, укажите телефон продавца');
-      return;
-    }
-
-    const files = photosInput.files;
-    if (files.length > 3) {
-      alert('Можно загрузить максимум 3 фото');
-      return;
-    }
-
-    const photosData = [];
-    for (let i = 0; i < files.length; i++) {
-      photosData.push(await readFileAsDataURL(files[i]));
-    }
-
-    const newProduct = {
-      name: productForm.name.value.trim(),
-      price: parseFloat(productForm.price.value).toFixed(2),
-      size: productForm.size.value.trim(),
-      city: city,
-      phone: phoneInput.value.trim(),
-      photos: photosData,
-    };
-
-    products.push(newProduct);
-    renderCatalog(filterCitySelect.value);
-    productForm.reset();
-    cityInput.value = '';
-    citySelect.value = '';
-    photosInput.value = null;
-  });
-
-  filterCitySelect.addEventListener('change', () => {
-    renderCatalog(filterCitySelect.value);
-  });
-
-  function renderCatalog(filterCity = '') {
-    catalogTableBody.innerHTML = '';
-
-    let filteredProducts = products;
-    if (filterCity) {
-      filteredProducts = products.filter(p => p.city.toLowerCase() === filterCity.toLowerCase());
-    }
-
-    updateCityFilterOptions();
-
-    filteredProducts.forEach(product => {
-      const photosHtml = product.photos.length
-        ? product.photos.map(src => `<img src="${src}" alt="Фото товара">`).join('')
-        : 'Нет фото';
-
-      // Кнопки контакта
-      // Телефонный звонок:
-      const phoneLink = `<a href="tel:${product.phone}" title="Позвонить продавцу">&#128222;</a>`;
-      // WhatsApp (если номер в международном формате +33...):
-      // Убираем все кроме цифр и плюс
-      const phoneDigits = product.phone.replace(/[^+\d]/g, '');
-      const whatsappLink = `<a href="https://wa.me/${phoneDigits.replace('+', '')}" target="_blank" title="Написать в WhatsApp">&#128241;</a>`;
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="photos-cell">${photosHtml}</td>
-        <td>${product.name}</td>
-        <td>€${product.price}</td>
-        <td>${product.size}</td>
-        <td>${product.city}</td>
-        <td class="contact-cell">${phoneLink} ${whatsappLink}</td>
-      `;
-      catalogTableBody.appendChild(tr);
-    });
+  if (!productName || !price || !city || !contactMethod) {
+    alert('Пожалуйста, заполните все обязательные поля');
+    return;
+  }
+  if (contactMethod === 'phone' && !phone) {
+    alert('Пожалуйста, введите телефон');
+    return;
+  }
+  if (contactMethod === 'email' && !email) {
+    alert('Пожалуйста, введите email');
+    return;
   }
 
-  function updateCityFilterOptions() {
-    const current = filterCitySelect.value;
-    const cities = [...new Set(products.map(p => p.city).filter(c => c.trim() !== ''))].sort();
+  const items = JSON.parse(localStorage.getItem('borzwearCatalog') || '[]');
+  items.push({ productName, price, city, contactMethod, phone, email });
+  localStorage.setItem('borzwearCatalog', JSON.stringify(items));
 
-    filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
+  alert('Товар добавлен в каталог!');
+  form.reset();
+  toggleContactInput();
+  loadCatalog();
+});
 
-    cities.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city;
-      option.textContent = city;
-      filterCitySelect.appendChild(option);
-    });
-
-    if (cities.includes(current)) {
-      filterCitySelect.value = current;
-    }
-  }
-
-  function readFileAsDataURL(file) {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  }
+window.onload = loadCatalog;
 </script>
 
 </body>
