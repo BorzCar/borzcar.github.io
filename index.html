@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BorzWear</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>BorzWear</h1>
+    <nav>
+      <button onclick="showSection('catalog')">Каталог</button>
+      <button onclick="showSection('sell')">Продать</button>
+    </nav>
+  </header>
+  <main>
+    <section id="catalog" class="visible">
+      <h2>Каталог одежды</h2>
+      <div id="items"></div>
+    </section>
+    <section id="sell" class="hidden">
+      <h2>Продать одежду</h2>
+      <form id="sellForm">
+        <input type="text" placeholder="Название" required /><br />
+        <input type="text" placeholder="Категория" required /><br />
+        <input type="text" placeholder="Размер" required /><br />
+        <input type="number" placeholder="Цена" required /><br />
+        <input type="text" placeholder="Телефон" required /><br />
+        <textarea placeholder="Описание"></textarea><br />
+        <input type="file" accept="image/*" /><br />
+        <button type="submit">Опубликовать</button>
+      </form>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
