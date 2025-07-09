@@ -1,25 +1,215 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BorzWear - Каталог одежды с контактами</title>
-  <style>
-    /* (оставил весь твой оригинальный CSS без изменений) */
-    /* ...весь CSS остаётся таким же, как ты прислал... */
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BorzWear - Каталог одежды с контактами</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #fafafa;
+    padding: 40px 20px;
+    color: #222;
+  }
+  h1 {
+    font-size: 2.8rem;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  form {
+    max-width: 700px;
+    margin: 0 auto 40px auto;
+    background: #fff;
+    padding: 30px 35px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  label {
+    display: block;
+    font-size: 1.3rem;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  input[type="text"], input[type="number"], input[type="tel"], select {
+    width: 100%;
+    font-size: 1.3rem;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    box-sizing: border-box;
+    transition: border-color 0.25s ease;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, input[type="tel"]:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  input[type="file"] {
+    margin-top: 8px;
+  }
+  button {
+    margin-top: 30px;
+    width: 100%;
+    font-size: 1.6rem;
+    padding: 18px 0;
+    background: #007bff;
+    border: none;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,123,255,0.6);
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  #filterCity {
+    display: block;
+    margin: 0 auto 25px auto;
+    font-size: 1.3rem;
+    padding: 12px 16px;
+    width: 320px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    transition: border-color 0.25s ease;
+  }
+  #filterCity:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  #filterBlock {
+    max-width: 700px;
+    margin: 0 auto 20px auto;
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  #filterBlock label {
+    font-size: 1.3rem;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  #filterBlock input {
+    width: 100%;
+    font-size: 1.3rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.8px solid #ccc;
+    box-sizing: border-box;
+  }
+  table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  }
+  th, td {
+    padding: 18px 22px;
+    font-size: 1.3rem;
+    border-bottom: 1px solid #e6e6e6;
+    vertical-align: middle;
+    text-align: left;
+  }
+  th {
+    background: #007bff;
+    color: white;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  td img {
+    max-width: 80px;
+    max-height: 80px;
+    margin-right: 8px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .photos-cell {
+    display: flex;
+    gap: 6px;
+  }
+  .contact-cell a {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: #007bff;
+    border: 1.5px solid #007bff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .contact-cell a:hover {
+    background-color: #007bff;
+    color: white;
+  }
+</style>
 </head>
 <body>
 
 <h1>Добавить товар</h1>
 <form id="productForm">
-  <!-- форма добавления товара (без изменений) -->
+  <label for="name">Название одежды</label>
+  <input type="text" id="name" name="name" required placeholder="Например, Футболка BorzWear" />
+
+  <label for="price">Цена (€)</label>
+  <input type="number" id="price" name="price" min="0" step="0.01" required placeholder="Введите цену" />
+
+  <label for="size">Размер</label>
+  <input type="text" id="size" name="size" required placeholder="Например, M, L, XL" />
+
+  <label for="phone">Телефон продавца</label>
+  <input type="tel" id="phone" name="phone" required placeholder="+33 6 12 34 56 78" pattern="^\+?[0-9\s\-]{7,15}$" />
+
+  <label for="citySelect">Выберите город</label>
+  <select id="citySelect" name="citySelect">
+    <option value="">-- Выберите город --</option>
+    <option>Анже</option>
+    <option>Бордо</option>
+    <option>Валансьен</option>
+    <option>Гренобль</option>
+    <option>Дижон</option>
+    <option>Клермон-Ферран</option>
+    <option>Лилль</option>
+    <option>Лион</option>
+    <option>Монпелье</option>
+    <option>Нант</option>
+    <option>Ним</option>
+    <option>Ницца</option>
+    <option>Париж</option>
+    <option>Марсель</option>
+    <option>Реймс</option>
+    <option>Ренн</option>
+    <option>Сент-Этьен</option>
+    <option>Страсбург</option>
+    <option>Тулуза</option>
+    <option>Тулон</option>
+  </select>
+
+  <label for="cityInput">Или введите город вручную</label>
+  <input type="text" id="cityInput" name="cityInput" placeholder="Например, Лилль" />
+
+  <label for="photos">Загрузите до 3 фото товара</label>
+  <input type="file" id="photos" name="photos" accept="image/*" multiple />
+
+  <button type="submit">Добавить в каталог</button>
 </form>
 
 <h1>Каталог одежды</h1>
 
 <div id="filterBlock">
-  <!-- блок фильтров (без изменений) -->
+  <label for="filterName">Поиск по названию:</label>
+  <input type="text" id="filterName" placeholder="Введите название..." />
+
+  <label for="filterMaxPrice">Максимальная цена (€):</label>
+  <input type="number" id="filterMaxPrice" min="0" step="0.01" placeholder="Любая" />
+
+  <label for="filterSize">Размер:</label>
+  <input type="text" id="filterSize" placeholder="Например, M, L, XL" />
 </div>
 
 <label for="filterCity">Фильтр по городу:</label>
@@ -57,21 +247,7 @@
 
   let products = [];
 
-  // Загрузка сохранённых товаров при старте
-  window.addEventListener('DOMContentLoaded', () => {
-    const savedProducts = localStorage.getItem('borzwear_products');
-    if (savedProducts) {
-      products = JSON.parse(savedProducts);
-      renderCatalog();
-    }
-  });
-
-  // Сохраняем товары в localStorage
-  function saveProducts() {
-    localStorage.setItem('borzwear_products', JSON.stringify(products));
-  }
-
-  // При выборе города из селекта подставляем в инпут
+  // При выборе города из селекта подставляем в инпут, чтобы удобнее было
   citySelect.addEventListener('change', () => {
     cityInput.value = citySelect.value;
   });
@@ -80,12 +256,21 @@
     e.preventDefault();
 
     let city = cityInput.value.trim() || citySelect.value.trim();
-    if (!city) return alert('Пожалуйста, укажите город');
+    if (!city) {
+      alert('Пожалуйста, укажите город (выберите или введите вручную)');
+      return;
+    }
 
-    if (!productForm.phone.value.trim()) return alert('Пожалуйста, укажите телефон продавца');
+    if (!productForm.phone.value.trim()) {
+      alert('Пожалуйста, укажите телефон продавца');
+      return;
+    }
 
     const files = photosInput.files;
-    if (files.length > 3) return alert('Можно загрузить максимум 3 фото');
+    if (files.length > 3) {
+      alert('Можно загрузить максимум 3 фото');
+      return;
+    }
 
     const photosData = [];
     for (let i = 0; i < files.length; i++) {
@@ -102,7 +287,6 @@
     };
 
     products.push(newProduct);
-    saveProducts();
     renderCatalog();
     productForm.reset();
     cityInput.value = '';
@@ -110,6 +294,7 @@
     photosInput.value = null;
   });
 
+  // Помогает читать файл в dataURL для отображения фото
   function readFileAsDataURL(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -119,6 +304,7 @@
     });
   }
 
+  // Функция отрисовки каталога с применением фильтров
   function renderCatalog() {
     const nameFilter = filterNameInput.value.trim().toLowerCase();
     const maxPriceFilter = parseFloat(filterMaxPriceInput.value);
@@ -127,17 +313,20 @@
 
     catalogTableBody.innerHTML = '';
 
+    // Фильтруем товары по всем фильтрам
     const filteredProducts = products.filter(product => {
       if (nameFilter && !product.name.toLowerCase().includes(nameFilter)) return false;
-      if (!isNaN(maxPriceFilter) && parseFloat(product.price) > maxPriceFilter) return false;
+      if (!isNaN(maxPriceFilter) && product.price > maxPriceFilter) return false;
       if (sizeFilter && product.size.toLowerCase() !== sizeFilter) return false;
       if (cityFilter && product.city.toLowerCase() !== cityFilter) return false;
       return true;
     });
 
+    // Отрисовка строк таблицы
     filteredProducts.forEach(product => {
       const tr = document.createElement('tr');
 
+      // Фото
       const tdPhotos = document.createElement('td');
       tdPhotos.classList.add('photos-cell');
       product.photos.forEach(photo => {
@@ -148,28 +337,36 @@
       });
       tr.appendChild(tdPhotos);
 
+      // Название
       const tdName = document.createElement('td');
       tdName.textContent = product.name;
       tr.appendChild(tdName);
 
+      // Цена
       const tdPrice = document.createElement('td');
       tdPrice.textContent = product.price;
       tr.appendChild(tdPrice);
 
+      // Размер
       const tdSize = document.createElement('td');
       tdSize.textContent = product.size;
       tr.appendChild(tdSize);
 
+      // Город
       const tdCity = document.createElement('td');
       tdCity.textContent = product.city;
       tr.appendChild(tdCity);
 
+      // Контакты
       const tdContact = document.createElement('td');
       tdContact.classList.add('contact-cell');
+
+      // Телефон - кликабельный
       const aPhone = document.createElement('a');
       aPhone.href = `tel:${product.phone}`;
       aPhone.textContent = 'Позвонить';
       tdContact.appendChild(aPhone);
+
       tr.appendChild(tdContact);
 
       catalogTableBody.appendChild(tr);
@@ -178,6 +375,7 @@
     updateCityFilterOptions();
   }
 
+  // Обновление списка городов в фильтре по всем товарам
   function updateCityFilterOptions() {
     const uniqueCities = [...new Set(products.map(p => p.city))];
     filterCitySelect.innerHTML = '<option value="" selected>Все города</option>';
@@ -189,10 +387,14 @@
     });
   }
 
+  // Фильтры: при изменении данных сразу обновляем таблицу
   filterNameInput.addEventListener('input', renderCatalog);
   filterMaxPriceInput.addEventListener('input', renderCatalog);
   filterSizeInput.addEventListener('input', renderCatalog);
   filterCitySelect.addEventListener('change', renderCatalog);
+
+  // Инициализация пустого каталога
+  renderCatalog();
 </script>
 
 </body>
